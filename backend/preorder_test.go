@@ -13,7 +13,7 @@ type Preorder struct {
 	Url      string `gorm:"uniqueIndex" valid:"url~does not validate as url"`
 	Email    string `gorm:"uniqueIndex" valid:"email~does not validate as email"`
 	Year     string `valid:"required~year not blank"`
-	Amount   int
+	Amount   int    `valid:"required~ราคาหนังสือไม่ถูกต้อง, range(1|5)~ราคาหนังสือไม่ถูกต้อง"`
 }
 
 func TestNameNotBlank(t *testing.T) {
@@ -82,5 +82,36 @@ func TestYearNotBlank(t *testing.T) {
 	g.Expect(ok).ToNot(BeTrue())
 	g.Expect(err).ToNot(BeNil())
 	g.Expect(err.Error()).To(Equal("year not blank"))
+
+}
+
+func TestAmountNotBlank(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	fixture := []int{
+		-1, 0, 6}
+
+	for _, price := range fixture {
+		pr := Preorder{
+			NameBook: "bookname",
+			Url:      "http://www.facebook.com",
+			Email:    "maprang@gmail.com",
+			Year:     "2555",
+			Amount:   price,
+		}
+
+		//ตรวจสอบด้วย govalidator
+		ok, err := govalidator.ValidateStruct(pr)
+
+		//ok ต้องไม่เป็นค่า true แปลว่าต้องจับ err ได้
+		g.Expect(ok).ToNot(BeTrue())
+
+		// err ต้องไม่เป็นค่า nil แปลว่าต้องจับ error ได้
+		g.Expect(err).ToNot(BeNil())
+
+		// err.Error ต้องมี error message แสดงออกมา
+		g.Expect(err.Error()).To(Equal("ราคาหนังสือไม่ถูกต้อง"))
+
+	}
 
 }
