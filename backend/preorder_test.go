@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"fmt"
 	"github.com/asaskevich/govalidator"
 	. "github.com/onsi/gomega"
 	"gorm.io/gorm"
@@ -14,6 +15,23 @@ type Preorder struct {
 	Email    string `gorm:"uniqueIndex" valid:"email~does not validate as email"`
 	Year     string `valid:"required~year not blank"`
 	Amount   int    `valid:"required~ราคาหนังสือไม่ถูกต้อง, range(1|5)~ราคาหนังสือไม่ถูกต้อง"`
+}
+
+func TestCorrectPreorder(t *testing.T) {
+	g := NewGomegaWithT(t)
+	pr := Preorder{
+		NameBook: "book",
+		Url:      "https://www.facebook.com/",
+		Email:    "bookname@gmail.com",
+		Year:     "2565",
+		Amount:   2,
+	}
+	ok, err := govalidator.ValidateStruct(pr)
+
+	g.Expect(ok).To(BeTrue())
+	g.Expect(err).To((BeNil()))
+
+	fmt.Println(err)
 }
 
 func TestNameNotBlank(t *testing.T) {
